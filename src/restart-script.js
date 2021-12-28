@@ -1,5 +1,5 @@
+import { FILES_TO_DISTRIBUTE } from "./constants.js";
 import { readServerFile } from "./server-scan.js";
-import { EXCLUDED_SERVERS, FILES_TO_DISTRIBUTE } from "./constants.js";
 
 /** @param {NS} ns **/
 /** @param {import(".").NS } ns */

@@ -1,5 +1,5 @@
+import { EXCLUDED_SERVERS, HACKING_SYNC_CONSTANT, SERVER_FORTIFY_AMOUNT, SERVER_WEAKEN_AMOUNT } from "./constants.js";
 import { readServerFile } from "./server-scan.js";
-import { EXCLUDED_SERVERS, HACKING_SYNC_CONSTANT, SERVER_FORTIFY_AMOUNT, SERVER_WEAKEN_AMOUNT } from ".constants.js";
 /** @param {import(".").NS } ns */
 export async function main(ns) {
     while (true) {

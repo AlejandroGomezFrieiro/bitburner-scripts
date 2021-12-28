@@ -1,6 +1,6 @@
 
-import { PORT_LIST } from "./port-programs.js";
-import { readServerFile } from "./server-scan.js";
+import { PORT_LIST } from "/src/port-programs.js";
+import { readServerFile } from "/src/server-scan.js";
 
 
 /** @param {NS} ns **/

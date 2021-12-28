@@ -20,15 +20,18 @@ export async function main(ns) {
 
 async function importFiles(ns) {
     let files = [
+        'constants.js',
+        'controller.js',
         'get-root-access.js',
         'grow.js',
         'hack.js',
-        'weaken.js',
-        'hack-script.js',
         'kill-all.js',
         'port-programs.js',
+        'queue.js',
         'restart-script.js',
         'server-scan.js',
+        'weaken.js',
+        'worker.js',
     ];
     let filesImported = true;
     for (let file of files) {

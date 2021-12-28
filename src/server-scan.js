@@ -52,8 +52,6 @@ export async function writeServerFile(ns = ns, fileName = 'serverFile.txt', func
  * @param {NS} ns
 **/
 export function readServerFile(ns = ns, fileName = "serverFile.txt") {
-	const fs = require('fs');
-
 	// read JSON object from file
 	ns.read(fileName);
 

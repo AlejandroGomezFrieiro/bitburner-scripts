@@ -30,12 +30,12 @@ export async function main(ns) {
 }
 
 /** @param {import(".").NS } ns */
-function getServerAvailableRam(ns, rootedServers) {
+export function getServerAvailableRam(ns, rootedServers) {
     return ns.getServerMaxRam(rootedServers[0]) - ns.getServerUsedRam(rootedServers[0]);
 }
 
 /** @param {import(".").NS } ns */
-function recalculateTimings(ns, targetServer) {
+export function recalculateTimings(ns, targetServer) {
     return {
         hackTime: ns.getHackTime(targetServer),
         weakenTime: ns.getWeakenTime(targetServer),
@@ -44,7 +44,7 @@ function recalculateTimings(ns, targetServer) {
 }
 
 /** @param {import(".").NS } ns */
-function recalculateThreading(ns, targetServer) {
+export function recalculateThreading(ns, targetServer) {
     let hackThreads = Math.floor(ns.hackAnalyzeThreads(targetServer, ns.getServerMaxMoney(targetServer) * 0.1));
     let growThreads = Math.floor(ns.growthAnalyze(targetServer, 1.1));
     let firstWeakenThreads = Math.floor(SERVER_FORTIFY_AMOUNT * hackThreads / SERVER_WEAKEN_AMOUNT);
@@ -57,7 +57,7 @@ function recalculateThreading(ns, targetServer) {
     };
 }
 
-function chooseNextTarget(ns, targetServers, metric) {
+export function chooseNextTarget(ns, targetServers, metric) {
     targetServers = targetServers.sort(function compareFunction(a, b) {
         let difference = metric(ns, b) - metric(ns, a);
         return difference;
@@ -87,6 +87,6 @@ function chooseNextTarget(ns, targetServers, metric) {
 // }
 
 /** @param {NS} ns **/
-function percentageAvailableMoneyMetric(ns, server) {
+export function percentageAvailableMoneyMetric(ns, server) {
     return ns.getServerMoneyAvailable(server) / ns.getServerMaxMoney(server);
 }

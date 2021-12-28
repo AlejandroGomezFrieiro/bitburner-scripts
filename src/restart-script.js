@@ -10,9 +10,6 @@ export async function main(ns) {
 	let serverList = Object.keys(readServerFile(ns, "serverFile.txt"));
 	await sendFileArrayToServerList(ns, FILES_TO_DISTRIBUTE, serverList);
 
-	let sortedTargetArray = Array.from(rootedServers).filter(
-		(serverName) => (!EXCLUDED_SERVERS.includes(serverName))
-	);
 	ns.spawn("controller.js");
 }
 

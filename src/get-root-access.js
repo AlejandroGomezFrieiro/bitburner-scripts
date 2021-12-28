@@ -39,7 +39,7 @@ export function nukeServer(ns, server) {
 }
 
 /** @param {NS} ns **/
-function checkServerPorts(ns, server, availablePortHacks) {
+export function checkServerPorts(ns, server, availablePortHacks) {
 	return ns.getServerNumPortsRequired(server) <= availablePortHacks.length;
 }
 

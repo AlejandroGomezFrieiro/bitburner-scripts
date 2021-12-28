@@ -18,7 +18,7 @@ export async function main(ns) {
     }
 }
 
-async function importFiles(ns) {
+export async function importFiles(ns) {
     let files = [
         'constants.js',
         'controller.js',

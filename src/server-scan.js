@@ -88,7 +88,7 @@ export class Queue extends Array {
  * @param {NS} ns
  **/
  /** @param {import(".").NS } ns */
-function generateServerObject(ns, serverName) {
+export function generateServerObject(ns, serverName) {
 	const usedRam = ns.getServerUsedRam(serverName);
 	const maxRam = ns.getServerMaxRam(serverName);
 	const availableMoney = ns.getServerMoneyAvailable(serverName);
@@ -121,7 +121,7 @@ function generateServerObject(ns, serverName) {
 /**
  * @param {NS} ns
  **/
- function generateServerSimpleObject(ns, serverName) {
+ export function generateServerSimpleObject(ns, serverName) {
 	const usedRam = ns.getServerUsedRam(serverName);
 	const maxRam = ns.getServerMaxRam(serverName);
 	const availableMoney = ns.getServerMoneyAvailable(serverName);

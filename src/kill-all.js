@@ -1,4 +1,4 @@
-/** @param {import("..").NS } ns */
+/** @param {import(".").NS } ns */
 import { readServerFile } from "./server-scan.js";
 
 export async function main(ns) {

@@ -1,5 +1,5 @@
 /** @param {import(".").NS } ns */
-import { readServerFile } from "/src/server-scan.js";
+import { readServerFile } from "./server-scan.js";
 
 export async function main(ns) {
     if (!ns.fileExists("serverFile.txt", "home")){

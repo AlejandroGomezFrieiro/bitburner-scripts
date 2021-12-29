@@ -10,7 +10,7 @@ export async function main(ns) {
     let filesImported = await importFiles(ns);
     ns.tprint('='.repeat(20));
     if (filesImported) {
-        ns.tprint(`You've installed the scripts in the ${config.folder} directory.`);
+        ns.tprint(`You've installed the scripts in the home directory.`);
     } else {
         ns.tprint(
             'You had some issues downloading files, please reach out to the repo maintainer or check your config.'

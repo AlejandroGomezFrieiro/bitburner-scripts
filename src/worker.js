@@ -1,17 +1,19 @@
-/**
- * @param {NS} ns
-**/
+import {HACKING_SYNC_CONSTANT} from "./constants.js";
 
 /** @param {import(".").NS } ns */
 
+/**
+ * @param {NS} ns
+**/
 export async function main(ns) {
+    ns.tprint(ns.args);
     let target = ns.args[0];
-    let timings = ns.args[1];
-    let threadings = ns.args[2];
-    startHackingBatch(ns, target, timings, threadings);
+    let timings = JSON.parse(ns.args[1]);
+    let threads = JSON.parse(ns.args[2]);
+    startHackingBatch(ns, target, timings, threads);
 }
 
-export function startHackingBatch(ns, target, timing, threadings) {
+export function startHackingBatch(ns, target, timings, threads) {
     // Start first weakening, which lasts for a time weakenTime.
     // Hack must finish T = 200 ms before the end of the first weaken. Then, it must have a delay of weakenTime - T - hackTime.
     // Grow must finish T= 200 ms after the end of the first weaken. Then, it must have a delay of weakenTime + T - growTime.

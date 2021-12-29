@@ -39,7 +39,7 @@ export async function importFiles(ns) {
         if (ns.fileExists(file)) {
             ns.rm(file);
         }
-        let result = await ns.wget(remoteFileName, `/${getFolder()}/${file}`);
+        let result = await ns.wget(remoteFileName, `${file}`);
         filesImported = filesImported && result;
         ns.tprint(`File: ${file}: ${result ? '✔️' : '❌'}`);
     }

@@ -1,7 +1,8 @@
-import { EXCLUDED_SERVERS, HACKING_SYNC_CONSTANT, SERVER_FORTIFY_AMOUNT, SERVER_WEAKEN_AMOUNT } from "/src/constants.js";
-import { readServerFile } from "/src/server-scan.js";
+import { EXCLUDED_SERVERS, HACKING_SYNC_CONSTANT, SERVER_FORTIFY_AMOUNT, SERVER_WEAKEN_AMOUNT } from "./constants.js";
+import { readServerFile } from "./server-scan.js";
 /** @param {import(".").NS } ns */
 export async function main(ns) {
+    ns.tprint("Controller started");
     while (true) {
         // Filter rooted servers by available RAM
         let serverList = Object.keys(readServerFile(ns, "serverFile.txt"));
@@ -11,15 +12,21 @@ export async function main(ns) {
             return difference;
         });
 
-        let targetServers = serverList.filter((serverName) => !EXCLUDED_SERVERS.include(serverName) && ns.getHackingLevel() > ns.getServerRequiredHackingLevel());
+        let targetServers = serverList.filter((serverName) => !EXCLUDED_SERVERS.includes(serverName) && Math.max(1, ns.getHackingLevel() > ns.getServerRequiredHackingLevel(serverName) / 1.5));
 
-        let nextTarget = chooseNextTarget(ns, targetServers, ns.getServerMaxMoney);
+        let nextTarget = chooseNextTarget(ns, targetServers, percentageAvailableMoneyMetric);
 
-        let timings = recalculateTimings(ns, targetServer);
-        let threadings = recalculateThreading(ns, targetServer);
-        let batchRAM = threadings.growThreads * ns.getScriptRam("grow.js", rootedServers[0]) + threadings.hackThreads * ns.getScriptRam("hack.js", rootedServers[0]) + threadings.firstWeakenThreads * ns.getScriptRam("weaken.js", rootedServers[0]) + threadings.secondWeakenThreads * ns.getScriptRam("weaken.js", rootedServers[0]);
-        
+        let timings = JSON.stringify(recalculateTimings(ns, nextTarget), null, 4);
+
+        let threadings = JSON.stringify(recalculateThreading(ns, nextTarget), null, 4);
+
+
+        let batchRAM = JSON.parse(threadings).growThreads * ns.getScriptRam("grow.js", rootedServers[0]) + JSON.parse(threadings).hackThreads * ns.getScriptRam("hack.js", rootedServers[0]) + JSON.parse(threadings).firstWeakenThreads * ns.getScriptRam("weaken.js", rootedServers[0]) + JSON.parse(threadings).secondWeakenThreads * ns.getScriptRam("weaken.js", rootedServers[0]);
         if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + batchRAM)) {
+            ns.tprint("Running worker in " + rootedServers[0]);
+            ns.tprint(nextTarget);
+            ns.tprint(timings);
+            ns.tprint(threadings);
             ns.exec("worker.js", rootedServers[0], 1, nextTarget, timings, threadings);
         }
         else if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("weaken.js", rootedServers[0]))) {
@@ -30,8 +37,8 @@ export async function main(ns) {
 }
 
 /** @param {import(".").NS } ns */
-export function getServerAvailableRam(ns, rootedServers) {
-    return ns.getServerMaxRam(rootedServers[0]) - ns.getServerUsedRam(rootedServers[0]);
+export function getServerAvailableRam(ns, server) {
+    return ns.getServerMaxRam(server) - ns.getServerUsedRam(server);
 }
 
 /** @param {import(".").NS } ns */
@@ -45,15 +52,15 @@ export function recalculateTimings(ns, targetServer) {
 
 /** @param {import(".").NS } ns */
 export function recalculateThreading(ns, targetServer) {
-    let hackThreads = Math.floor(ns.hackAnalyzeThreads(targetServer, ns.getServerMaxMoney(targetServer) * 0.1));
-    let growThreads = Math.floor(ns.growthAnalyze(targetServer, 1.1));
+    let hackThreads = Math.floor(ns.hackAnalyzeThreads(targetServer, ns.getServerMaxMoney(targetServer) * 0.001));
+    let growThreads = Math.floor(ns.growthAnalyze(targetServer, 1.001));
     let firstWeakenThreads = Math.floor(SERVER_FORTIFY_AMOUNT * hackThreads / SERVER_WEAKEN_AMOUNT);
     let secondWeakenThreads = Math.floor(SERVER_FORTIFY_AMOUNT * growThreads / SERVER_WEAKEN_AMOUNT);
     return {
-        hackThreads: hackThreads,
-        growThreads: growThreads,
-        firstWeakenThreads: firstWeakenThreads,
-        secondWeakenThreads: secondWeakenThreads
+        hackThreads: Math.max(1, hackThreads),
+        growThreads: Math.max(1, growThreads),
+        firstWeakenThreads: Math.max(1, firstWeakenThreads),
+        secondWeakenThreads: Math.max(1, secondWeakenThreads)
     };
 }
 

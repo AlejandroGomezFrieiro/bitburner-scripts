@@ -1,6 +1,6 @@
 export const EXCLUDED_SERVERS = ["home", "pserv", "darkweb"];
 
-export const FILES_TO_DISTRIBUTE = ["worker.js", "weaken.js", "grow.js", "hack.js", "constants.js"];
+export const FILES_TO_DISTRIBUTE = ["worker.js", "weaken.js", "grow.js", "hack.js", "constants.js", "scan-servers.js"];
 
 export const NEXT_TARGET_PORT = 1;
 

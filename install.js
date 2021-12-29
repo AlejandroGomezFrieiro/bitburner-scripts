@@ -27,6 +27,7 @@ export async function importFiles(ns) {
         'hack.js',
         'kill-all.js',
         'port-programs.js',
+        'purchase-server-worker.js',
         'queue.js',
         'restart-script.js',
         'server-scan.js',

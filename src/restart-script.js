@@ -13,10 +13,11 @@ export async function main(ns) {
 	ns.spawn("controller.js");
 }
 
+/** @param {import(".").NS } ns */
 export async function sendFileArrayToServerList(ns, fileList, serverList) {
 	for (var i = 0; i < serverList.length; ++i) {
 		if (ns.hasRootAccess(serverList[i]) == true) {
-			await ns.scp(fileList, "home", serverList[i]);
+			await ns.scp(fileList, "home", `${serverList[i]}/src/`);
 		}
 	}
 }

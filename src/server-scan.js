@@ -53,7 +53,7 @@ export async function writeServerFile(ns = ns, fileName = 'serverFile.txt', func
 **/
 export function readServerFile(ns = ns, fileName = "serverFile.txt") {
 	// read JSON object from file
-	ns.read(fileName);
+	let data = ns.read(fileName);
 
 	// parse JSON object
 	const serverList = JSON.parse(data.toString());

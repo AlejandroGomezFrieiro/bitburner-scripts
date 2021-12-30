@@ -1,9 +1,37 @@
 import { EXCLUDED_SERVERS, HACKING_SYNC_CONSTANT, SERVER_FORTIFY_AMOUNT, SERVER_WEAKEN_AMOUNT } from "./constants.js";
 import { readServerFile } from "./server-scan.js";
 /** @param {import(".").NS } ns */
+/** @param {NS} ns **/
 export async function main(ns) {
     ns.tprint("Controller started");
     let workerCounter = 0;
+    if (ns.args.length > 0) {
+        while (true) {
+            let target = ns.args[0];
+            let serverList = Object.keys(readServerFile(ns, "serverFile.txt"));
+            let rootedServers = serverList.filter((serverName) => ns.hasRootAccess(serverName));
+            rootedServers = rootedServers.sort(function compareFunction(a, b) {
+                let difference = (ns.getServerMaxRam(b) - ns.getServerUsedRam(b)) - (ns.getServerMaxRam(a) - ns.getServerUsedRam(a));
+                return difference;
+            });
+            // ns.tprint(rootedServers);
+            // let targetSer    vers = rootedServers.filter((serverName) => !EXCLUDED_SERVERS.includes(serverName) && ns.getHackingLevel() / 1.5 > (ns.getServerRequiredHackingLevel(serverName)));
+            // ns.tprint(ns.getScriptRam("worker.js", rootedServers[0]) + 6 * ns.getScriptRam("hack.js", rootedServers[0]));
+            if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + 6 * ns.getScriptRam("hack.js", rootedServers[0]))) {
+                // ns.tprint(nextTarget);
+                ns.tprint("Running script on " + rootedServers[0]);
+                ns.exec("worker.js", rootedServers[0], 1, target, workerCounter);
+                ++workerCounter;
+            }
+            else {
+                ns.exec("grow.js", rootedServers[0], 1, target, workerCounter);
+                ns.exec("weaken.js", rootedServers[0], 1, target, workerCounter);
+                ++workerCounter;
+            }
+            await ns.sleep(1000);
+        }
+    }
+    
     while (true) {
         // Filter rooted servers by available RAM
         let serverList = Object.keys(readServerFile(ns, "serverFile.txt"));
@@ -13,22 +41,22 @@ export async function main(ns) {
             return difference;
         });
 
-        let targetServers = rootedServers.filter((serverName) => !EXCLUDED_SERVERS.includes(serverName) && ns.getHackingLevel() > ns.getServerRequiredHackingLevel(serverName) / 1.5);
+        let targetServers = rootedServers.filter((serverName) => !EXCLUDED_SERVERS.includes(serverName) && ns.getHackingLevel() / 1.5 > (ns.getServerRequiredHackingLevel(serverName)));
 
-        let nextTarget = chooseNextTarget(ns, targetServers, moneyDividedByHackTime);
+        let nextTarget = chooseNextTarget(ns, targetServers, maxMoneyMetric);
 
 
         // let timings = JSON.stringify(recalculateTimings(ns, nextTarget), null, 4);
 
         // let threadings = JSON.stringify(recalculateThreading(ns, nextTarget), null, 4);
-        // ns.tprint(batchRAM);
+        // ns.tprint(ns.getScriptRam("worker.js", rootedServers[0]) + 6 * ns.getScriptRam("hack.js", rootedServers[0]));
         if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + 6 * ns.getScriptRam("hack.js", rootedServers[0]))) {
-        ns.tprint(nextTarget);
-        ns.tprint(rootedServers[0]);
+            // ns.tprint(nextTarget);
+            // ns.tprint(rootedServers[0]);
             ns.exec("worker.js", rootedServers[0], 1, nextTarget, workerCounter);
             ++workerCounter;
         }
-        await ns.sleep(3 * HACKING_SYNC_CONSTANT);
+        await ns.sleep(1000);
     }
 }
 
@@ -102,5 +130,5 @@ export function maxMoneyMetric(ns, server) {
 
 /** @param {NS} ns **/
 export function moneyDividedByHackTime(ns, server) {
-    return ns.getServerMaxMoney(server)/ns.getWeakenTime(server);
+    return ns.getServerMaxMoney(server) / ns.getWeakenTime(server);
 }

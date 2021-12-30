@@ -64,12 +64,15 @@ export async function startHackingBatch(ns, target, step, workerCounter, threadC
             break;
         case "grow":
             // time = ns.getGrowTime(target);
-            threads = 3;
+            threads = 5;
             sleepTime = weakenTime - HACKING_SYNC_CONSTANT - hackTime;
             break;
     };
-    ns.tprint(`running ${step.action}.js`);
-    ns.run(`${step.action}.js`, threads, target, workerCounter, threadCounter);
+    // ns.tprint(`running ${step.action}.js`);
+    let runStatus = ns.run(`${step.action}.js`, threads, target, workerCounter, threadCounter);
+    if (runStatus == 0){
+        return hackingActions[`${step.name}`];
+    }
     await ns.sleep(sleepTime);
     return hackingActions[`${step.next}`];
     // await ns.sleep(2 * HACKING_SYNC_CONSTANT);

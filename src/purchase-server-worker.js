@@ -9,7 +9,7 @@ export async function main(ns) {
     while (true) {
         // let myMoney = ns.getServerMoneyAvailable("home");
         const purchasedServers = ns.getPurchasedServers();
-        let counter = 0
+        let counter = 0;
         while (purchasedServers < maxServers) {
             if (ns.getServerMoneyAvailable("home") > ns.getPurchasedServerCost(2)) {
                 ns.purchaseServer(`${serverName}-${counter}`, 2);
@@ -24,7 +24,7 @@ export async function main(ns) {
                 }
             }
         }
-        await ns.sleep(2000);
+        await ns.sleep(20000);
     }
 }
 

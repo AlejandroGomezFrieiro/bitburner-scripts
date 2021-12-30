@@ -21,11 +21,10 @@ export async function main(ns) {
         // let timings = JSON.stringify(recalculateTimings(ns, nextTarget), null, 4);
 
         // let threadings = JSON.stringify(recalculateThreading(ns, nextTarget), null, 4);
-
         // ns.tprint(batchRAM);
-        if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + ns.getScriptRam("hack.js", rootedServers[0]))) {
-            ns.tprint(nextTarget);
-            ns.tprint(rootedServers[0]);
+        if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + 6 * ns.getScriptRam("hack.js", rootedServers[0]))) {
+        ns.tprint(nextTarget);
+        ns.tprint(rootedServers[0]);
             ns.exec("worker.js", rootedServers[0], 1, nextTarget, workerCounter);
             ++workerCounter;
         }
@@ -103,5 +102,5 @@ export function maxMoneyMetric(ns, server) {
 
 /** @param {NS} ns **/
 export function moneyDividedByHackTime(ns, server) {
-    return ns.getServerMaxMoney(server) / ns.getWeakenTime(server);
+    return ns.getServerMaxMoney(server)/ns.getWeakenTime(server);
 }

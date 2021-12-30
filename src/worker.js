@@ -6,7 +6,7 @@ import { hackingActions, HACKING_SYNC_CONSTANT } from "./constants.js";
  * @param {NS} ns
 **/
 export async function main(ns) {
-    ns.tprint(ns.args);
+    // ns.tprint(ns.args);
     let target = ns.args[0];
     let workerCounter = ns.args[1];
     // let timings = JSON.parse(ns.args[1]);
@@ -18,23 +18,32 @@ export async function main(ns) {
     // ns.tprint(target);
     // ns.tprint(hackingActions["firstWeaken"]["next"]);
     while (true) {
-        ns.tprint(nextStep);
-        nextStep = startHackingBatch(ns, target, nextStep, workerCounter, threadCounter);
-        ns.tprint(nextStep);
+        // ns.tprint(nextStep);
+        nextStep = await startHackingBatch(ns, target, nextStep, workerCounter, threadCounter);
+        // ns.tprint(nextStep);
         ++threadCounter;
         if (nextStep.name == "end") {
             return;
         }
-        await ns.sleep(100);
+        await ns.sleep(1000);
     }
 }
+
+
+// /** @param {import(".").NS } ns */
+// export function getServerAvailableRam(ns, server) {
+//     return ns.getServerMaxRam(server) - ns.getServerUsedRam(server);
+// }
 
 /**
  * @param {NS} ns
 **/
-export function startHackingBatch(ns, target, step, workerCounter, threadCounter) {
+export async function startHackingBatch(ns, target, step, workerCounter, threadCounter) {
     let sleepTime;
     let threads;
+    let hackTime = ns.getHackTime(target);
+    let weakenTime = ns.getWeakenTime(target);
+    let growTime = ns.getGrowTime(target);
     // let sleep;
     // ns.tprint(step.next);
     switch (step.name) {
@@ -51,16 +60,17 @@ export function startHackingBatch(ns, target, step, workerCounter, threadCounter
         case "secondWeaken":
             // time = ns.getWeakenTime(target);
             threads = 1;
-            sleepTime = timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime;
+            sleepTime = weakenTime + HACKING_SYNC_CONSTANT - growTime;
             break;
         case "grow":
             // time = ns.getGrowTime(target);
-            threads = 5;
-            sleepTime = timings.weakenTime - HACKING_SYNC_CONSTANT - timings.hackTime;
+            threads = 3;
+            sleepTime = weakenTime - HACKING_SYNC_CONSTANT - hackTime;
             break;
     };
-    ns.tprint(`running ${step.action}.js`)
+    ns.tprint(`running ${step.action}.js`);
     ns.run(`${step.action}.js`, threads, target, workerCounter, threadCounter);
+    await ns.sleep(sleepTime);
     return hackingActions[`${step.next}`];
     // await ns.sleep(2 * HACKING_SYNC_CONSTANT);
     // await ns.sleep(timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime);

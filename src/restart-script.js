@@ -11,7 +11,7 @@ export async function main(ns) {
 	await sendFileArrayToServerList(ns, FILES_TO_DISTRIBUTE, serverList);
 
 	ns.tprint("Files sent, starting controller.js");
-	ns.run("controller.js");
+	ns.spawn("controller.js");
 }
 
 /** @param {import(".").NS } ns */

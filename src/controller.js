@@ -3,6 +3,7 @@ import { readServerFile } from "./server-scan.js";
 /** @param {import(".").NS } ns */
 export async function main(ns) {
     ns.tprint("Controller started");
+    let workerCounter = 0;
     while (true) {
         // Filter rooted servers by available RAM
         let serverList = Object.keys(readServerFile(ns, "serverFile.txt"));
@@ -12,25 +13,21 @@ export async function main(ns) {
             return difference;
         });
 
-        let targetServers = serverList.filter((serverName) => !EXCLUDED_SERVERS.includes(serverName) && Math.max(1, ns.getHackingLevel() > ns.getServerRequiredHackingLevel(serverName) / 1.5));
+        let targetServers = rootedServers.filter((serverName) => !EXCLUDED_SERVERS.includes(serverName) && ns.getHackingLevel() > ns.getServerRequiredHackingLevel(serverName) / 1.5);
 
-        let nextTarget = chooseNextTarget(ns, targetServers, percentageAvailableMoneyMetric);
-
-        let timings = JSON.stringify(recalculateTimings(ns, nextTarget), null, 4);
-
-        let threadings = JSON.stringify(recalculateThreading(ns, nextTarget), null, 4);
+        let nextTarget = chooseNextTarget(ns, targetServers, moneyDividedByHackTime);
 
 
-        let batchRAM = JSON.parse(threadings).growThreads * ns.getScriptRam("grow.js", rootedServers[0]) + JSON.parse(threadings).hackThreads * ns.getScriptRam("hack.js", rootedServers[0]) + JSON.parse(threadings).firstWeakenThreads * ns.getScriptRam("weaken.js", rootedServers[0]) + JSON.parse(threadings).secondWeakenThreads * ns.getScriptRam("weaken.js", rootedServers[0]);
-        if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + batchRAM)) {
-            ns.tprint("Running worker in " + rootedServers[0]);
+        // let timings = JSON.stringify(recalculateTimings(ns, nextTarget), null, 4);
+
+        // let threadings = JSON.stringify(recalculateThreading(ns, nextTarget), null, 4);
+
+        // ns.tprint(batchRAM);
+        if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("worker.js", rootedServers[0]) + ns.getScriptRam("hack.js", rootedServers[0]))) {
             ns.tprint(nextTarget);
-            ns.tprint(timings);
-            ns.tprint(threadings);
-            ns.exec("worker.js", rootedServers[0], 1, nextTarget, timings, threadings);
-        }
-        else if (getServerAvailableRam(ns, rootedServers[0]) > (ns.getScriptRam("weaken.js", rootedServers[0]))) {
-            ns.exec("weaken.js", rootedServers[0], 1, nextTarget);
+            ns.tprint(rootedServers[0]);
+            ns.exec("worker.js", rootedServers[0], 1, nextTarget, workerCounter);
+            ++workerCounter;
         }
         await ns.sleep(3 * HACKING_SYNC_CONSTANT);
     }
@@ -69,6 +66,7 @@ export function chooseNextTarget(ns, targetServers, metric) {
         let difference = metric(ns, b) - metric(ns, a);
         return difference;
     });
+
     return targetServers[0];
 
 }
@@ -96,4 +94,14 @@ export function chooseNextTarget(ns, targetServers, metric) {
 /** @param {NS} ns **/
 export function percentageAvailableMoneyMetric(ns, server) {
     return ns.getServerMoneyAvailable(server) / ns.getServerMaxMoney(server);
+}
+
+/** @param {NS} ns **/
+export function maxMoneyMetric(ns, server) {
+    return ns.getServerMaxMoney(server);
+}
+
+/** @param {NS} ns **/
+export function moneyDividedByHackTime(ns, server) {
+    return ns.getServerMaxMoney(server) / ns.getWeakenTime(server);
 }

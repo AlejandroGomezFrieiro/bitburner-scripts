@@ -1,4 +1,4 @@
-import {HACKING_SYNC_CONSTANT} from "./constants.js";
+import { hackingActions } from "./constants.js";
 
 /** @param {import(".").NS } ns */
 
@@ -8,25 +8,73 @@ import {HACKING_SYNC_CONSTANT} from "./constants.js";
 export async function main(ns) {
     ns.tprint(ns.args);
     let target = ns.args[0];
-    let timings = JSON.parse(ns.args[1]);
-    let threads = JSON.parse(ns.args[2]);
-    await startHackingBatch(ns, target, timings, threads);
+    let workerCounter = ns.args[1];
+    // let timings = JSON.parse(ns.args[1]);
+    // let threads = JSON.parse(ns.args[2]);
+
+    let threadCounter = 0;
+    let nextStep = hackingActions.firstWeaken;
+    // ns.tprint(nextStep.action);
+    // ns.tprint(target);
+    // ns.tprint(hackingActions["firstWeaken"]["next"]);
+    while (true) {
+        ns.tprint(nextStep);
+        nextStep = startHackingBatch(ns, target, nextStep, workerCounter, threadCounter);
+        ns.tprint(nextStep);
+        ++threadCounter;
+        if (nextStep.name == "end") {
+            return;
+        }
+        await ns.sleep(100);
+    }
 }
 
-export async function startHackingBatch(ns, target, timings, threads) {
+/**
+ * @param {NS} ns
+**/
+export function startHackingBatch(ns, target, step, workerCounter, threadCounter) {
+    let sleepTime;
+    let threads;
+    // let sleep;
+    // ns.tprint(step.next);
+    switch (step.name) {
+        case "hack":
+            // time = ns.getHackTime(target);
+            threads = 1;
+            sleepTime = HACKING_SYNC_CONSTANT;
+            break;
+        case "firstWeaken":
+            // time = ns.getWeakenTime(target);
+            threads = 1;
+            sleepTime = 2 * HACKING_SYNC_CONSTANT;
+            break;
+        case "secondWeaken":
+            // time = ns.getWeakenTime(target);
+            threads = 1;
+            sleepTime = timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime;
+            break;
+        case "grow":
+            // time = ns.getGrowTime(target);
+            threads = 5;
+            sleepTime = timings.weakenTime - HACKING_SYNC_CONSTANT - timings.hackTime;
+            break;
+    };
+    ns.tprint(`running ${step.action}.js`)
+    ns.run(`${step.action}.js`, threads, target, workerCounter, threadCounter);
+    return hackingActions[`${step.next}`];
+    // await ns.sleep(2 * HACKING_SYNC_CONSTANT);
+    // await ns.sleep(timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime);
+    // await ns.sleep(timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime);
+    // await ns.sleep(timings.weakenTime - HACKING_SYNC_CONSTANT - timings.hackTime);
     // Start first weakening, which lasts for a time weakenTime.
     // Hack must finish T = 200 ms before the end of the first weaken. Then, it must have a delay of weakenTime - T - hackTime.
     // Grow must finish T= 200 ms after the end of the first weaken. Then, it must have a delay of weakenTime + T - growTime.
     // Second weaken has to finish 2T = 400 ms after the end of the first weaken. Then, it must have a delay of oldWeakenTime + 2T - newWeakenTime.
     // Next batch must start 3T after weakenTime
-    ns.run("weaken.js", host, threads.firstWeakenThreads, target);
-    await ns.sleep(2 * HACKING_SYNC_CONSTANT);
-    ns.run("weaken.js", host, threads.secondWeakenThreads, target);
-    await ns.sleep(timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime);
-    ns.run("grow.js", host, threads.growThreads, target);
-    await ns.sleep(timings.weakenTime + HACKING_SYNC_CONSTANT - timings.growTime);
-    ns.run("hack.js", host, threads.hackThreads, target);
-    await ns.sleep(timings.weakenTime - HACKING_SYNC_CONSTANT - timings.hackTime);
+    // ns.run("weaken.js", threads.firstWeakenThreads, target);
+    // ns.run("weaken.js", threads.secondWeakenThreads, target);
+    // ns.run("grow.js", threads.growThreads, target);
+    // ns.run("hack.js", threads.hackThreads, target);
 }
 
 // LEGACY CODE
@@ -49,7 +97,7 @@ export async function startHackingBatch(ns, target, timings, threads) {
     // // await ns.sleep(ns.getGrowTime(target) + 2000);
     // // ns.run("weaken.js", Math.max(1, weakenThreads), target);
     // // await ns.sleep(ns.getWeakenTime(target) + 2000);
-    
+
     // if (ns.getServerSecurityLevel(target) > securityThresh) {
     //     ns.run("weaken.js", weakenThreads, target);
     // } else if (ns.getServerMaxMoney(target) < moneyThresh) {

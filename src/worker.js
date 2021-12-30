@@ -1,4 +1,4 @@
-import { hackingActions } from "./constants.js";
+import { hackingActions, HACKING_SYNC_CONSTANT } from "./constants.js";
 
 /** @param {import(".").NS } ns */
 
